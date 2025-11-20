@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心诺普充电桩选择</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, 'Microsoft YaHei', sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            max-width: 550px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 12px;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .title-icon {
+            font-size: 28px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        
+        .option {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 18px 20px;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #2c3e50;
+            text-decoration: none;
+            border: 2px solid transparent;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .option:hover::before {
+            left: 100%;
+        }
+        
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-color: #3498db;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+        }
+        
+        .option:active {
+            transform: translateY(0);
+        }
+        
+        .option:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .icon {
+            font-size: 26px;
+            width: 40px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .option:hover .icon {
+            transform: scale(1.2);
+        }
+        
+        .vehicle-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
+        }
+        
+        .vehicle-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .vehicle-id {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 4px;
+        }
+        
+        .option:hover .vehicle-id {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #2ecc71;
+            box-shadow: 0 0 5px #2ecc71;
+        }
+        
+        .footer {
+            margin-top: 25px;
+            color: #7f8c8d;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .scan-time {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: white;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+                border-radius: 15px;
+            }
+            
+            .option {
+                padding: 16px;
+                font-size: 15px;
+            }
+            
+            h2 {
+                font-size: 22px;
+            }
+            
+            .icon {
+                font-size: 24px;
+            }
+        }
+        
+        @media (max-width: 350px) {
+            .vehicle-info {
+                align-items: center;
+                text-align: center;
+            }
+            
+            .option {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="title-icon">🔋</span>
+            <h2>请选择充电桩</h2>
+            <span class="title-icon">⚡</span>
+        </div>
+        
+        <div class="options-grid">
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000311077401">
+                <span class="icon">🚗</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 01</span>
+                    <span class="vehicle-id">XNP-01-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+            
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000311021701">
+                <span class="icon">🚙</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 02</span>
+                    <span class="vehicle-id">XNP-02-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+            
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000307086701">
+                <span class="icon">🚐</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 03</span>
+                    <span class="vehicle-id">XNP-03-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+            
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000311062801">
+                <span class="icon">🚚</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 04</span>
+                    <span class="vehicle-id">XNP-04-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+            
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000307088001">
+                <span class="icon">🛻</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 05</span>
+                    <span class="vehicle-id">XNP-05-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+            
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000307073801">
+                <span class="icon">🚌</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 06</span>
+                    <span class="vehicle-id">XNP-06-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+            
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000311037001">
+                <span class="icon">🚛</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 07</span>
+                    <span class="vehicle-id">XNP-07-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+            
+            <button class="option" data-href="https://m.ykccn.com/charging/8200000311063201">
+                <span class="icon">🚎</span>
+                <div class="vehicle-info">
+                    <span class="vehicle-name">心诺普充电桩 08</span>
+                    <span class="vehicle-id">XNP-08-A</span>
+                </div>
+                <div class="status-indicator"></div>
+            </button>
+        </div>
+        
+        <div class="footer">
+            <p>扫描时间: <span id="scanTime" class="scan-time"></span></p>
+            <p>选择充电桩开始充电</p>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div>
+            <div class="loading-spinner"></div>
+            <div class="loading-text">正在连接充电桩...</div>
+        </div>
+    </div>
+
+    <script>
+        // 显示扫描时间
+        document.getElementById('scanTime').textContent = new Date().toLocaleString('zh-CN');
+        
+        // 获取所有选项按钮
+        const options = document.querySelectorAll('.option');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        let isNavigating = false;
+        
+        // 为每个选项添加点击事件
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                if (isNavigating) return; // 防止重复点击
+                
+                isNavigating = true;
+                const href = this.getAttribute('data-href');
+                
+                // 显示加载状态
+                loadingOverlay.classList.add('active');
+                
+                // 模拟网络延迟
+                setTimeout(() => {
+                    // 跳转到目标页面
+                    window.location.href = href;
+                }, 1500);
+            });
+        });
+        
+        // 添加键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            if (isNavigating) return;
+            
+            const currentFocus = document.activeElement;
+            let currentIndex = Array.from(options).indexOf(currentFocus);
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = (currentIndex + 1) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = (currentIndex - 1 + options.length) % options.length;
+                options[currentIndex].focus();
+            } else if (e.key === 'Enter' && currentFocus.classList.contains('option')) {
+                currentFocus.click();
+            }
+        });
+        
+        // 页面加载完成后的焦点设置
+        window.addEventListener('load', function() {
+            // 设置第一个选项为焦点
+            if (options.length > 0) {
+                options[0].focus();
+            }
+        });
+    </script>
+</body>
+</html>
